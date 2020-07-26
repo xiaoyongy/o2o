@@ -25,14 +25,15 @@ public class ImageUtil {
 
     /**
      * 将CommonsMultipartFile转换成FIle类
+     *
      * @param cFile
      * @return
      */
-    public static File transferCommonsMultipartFileToFile(CommonsMultipartFile cFile){
+    public static File transferCommonsMultipartFileToFile(CommonsMultipartFile cFile) {
         File newFile = new File(cFile.getOriginalFilename());
         try {
             cFile.transferTo(newFile);
-        } catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             logger.error(e.toString());
             e.printStackTrace();
         } catch (IOException e) {
@@ -41,28 +42,30 @@ public class ImageUtil {
         }
         return newFile;
     }
+
     /**
      * 处理缩略图，并返回新生成图片的相对值路径
+     *
      * @param thumbnailInputStream
      * @param targetAddr
      * @return
      */
-    public static String generateThumbnail(InputStream thumbnailInputStream,String fileName, String targetAddr) throws IOException {
+    public static String generateThumbnail(InputStream thumbnailInputStream, String fileName, String targetAddr) throws IOException {
         String realFileName = getRandomFileName();
         String extension = getFileExtension(fileName);
         makeDirPath(targetAddr);
-        String relativeAddr = targetAddr+realFileName+extension;
+        String relativeAddr = targetAddr + realFileName + extension;
         logger.debug("current relativeAddr is" + relativeAddr);
-        File dest = new File(PathUtil.getImgBasePath()+relativeAddr);
-        logger.debug("current complete addr is:" + PathUtil.getImgBasePath()+relativeAddr);
-        try{
+        File dest = new File(PathUtil.getImgBasePath() + relativeAddr);
+        logger.debug("current complete addr is:" + PathUtil.getImgBasePath() + relativeAddr);
+        try {
             Thumbnails.of(thumbnailInputStream).size(200, 200)
-                    .watermark(Positions.TOP_LEFT, ImageIO.read(new File(basePath+"watermark.jpg")),0.25f)
+                    .watermark(Positions.TOP_LEFT, ImageIO.read(new File(basePath + "watermark.jpg")), 0.25f)
                     .outputQuality(0.8f).toFile(dest);
         } catch (IOException e) {
             logger.error(e.toString());
 //            e.printStackTrace();
-            throw new IOException("generateThumbnail error:"+e.getMessage());
+            throw new IOException("generateThumbnail error:" + e.getMessage());
         }
         return relativeAddr;
     }
@@ -70,18 +73,20 @@ public class ImageUtil {
     /**
      * 创建目标路径所涉及到的目录，即/home/work/xiaolong.jpg,
      * 那么home work 这两个文件夹都得自动创建
+     *
      * @param targetAddr
      */
     private static void makeDirPath(String targetAddr) {
-        String realFileParentPath = PathUtil.getImgBasePath()+targetAddr;
+        String realFileParentPath = PathUtil.getImgBasePath() + targetAddr;
         File dirPath = new File(realFileParentPath);
-        if (!dirPath.exists()){
+        if (!dirPath.exists()) {
             dirPath.mkdirs();
         }
     }
 
     /**
      * 获取输入文件流的扩展名
+     *
      * @param fileName
      * @return
      */
@@ -93,23 +98,45 @@ public class ImageUtil {
 
     /**
      * 生成随机文件名，当前年月日小时分钟秒钟+五位随机数
+     *
      * @return
      */
     public static String getRandomFileName() {
-        int rannum = r.nextInt(89999)+10000;
+        int rannum = r.nextInt(89999) + 10000;
         String nowTimeStr = sDateFormat.format(new Date());
-        return nowTimeStr+rannum; //变成字符串
+        return nowTimeStr + rannum; //变成字符串
     }
 
     public static void main(String[] args) throws RuntimeException {
         try {
-            Thumbnails.of(new File("F:\\xiaolong.jpg")).size(200,200).
-                    watermark(Positions.TOP_LEFT, ImageIO.read(new File(basePath+"/watermar.jpg")), 0.25f)
+            Thumbnails.of(new File("F:\\xiaolong.jpg")).size(200, 200).
+                    watermark(Positions.TOP_LEFT, ImageIO.read(new File(basePath + "/watermar.jpg")), 0.25f)
                     .outputQuality(0.8f).toFile("F:\\xiaolongnew.jpg");
-        }catch (IOException e){
+        } catch (IOException e) {
 //            throw new Exception(e.getMessage());
             e.printStackTrace();
         }
         System.out.println("可以继续执行");
+    }
+
+    /**
+     * storePath是文件的路径还是目录的路径，
+     * 如果storePath是文件路径则删除该文件，
+     * 如果storePath是目录路径则删除该目录下的所有文件
+     *
+     * @param storePath
+     */
+    public static void deleteFileOrPath(String storePath) {
+//        获取文件或者图片的全路径
+        File fileOrPath = new File(PathUtil.getImgBasePath() + storePath);
+        if (fileOrPath.exists()) {
+            if (fileOrPath.isDirectory()) {  //路径是一个目录
+                File files[] = fileOrPath.listFiles();
+                for (int i = 0; i < files.length; i++) {
+                    files[i].delete();
+                }
+            }
+            fileOrPath.delete();
+        }
     }
 }

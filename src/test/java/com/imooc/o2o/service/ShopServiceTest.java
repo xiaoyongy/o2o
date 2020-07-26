@@ -27,6 +27,22 @@ public class ShopServiceTest extends BaseTest {
     private ShopService shopService;
 
     @Test
+    public void testModifyShop() throws ShopOperationException, FileNotFoundException{
+        Shop shop = new Shop();
+        shop.setShopId(1L);
+        shop.setShopName("修改后的店铺名称");
+        File shopImg = new File("F:\\card.jpg");
+//        获取图片文件流
+        InputStream is = new FileInputStream(shopImg);
+        try {
+            ShopExecution shopExecution = shopService.modifyShop(shop, is, "card.jpg");
+            System.out.println("新图片地址为：" + shopExecution.getShop().getShopImg());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testAddShop() throws ShopOperationException, FileNotFoundException{
         Shop shop = new Shop();
         PersonInfo owner = new PersonInfo();
